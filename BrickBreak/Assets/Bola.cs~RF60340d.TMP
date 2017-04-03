@@ -1,0 +1,126 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Bola : MonoBehaviour {
+    Vector3 mov;
+    Rigidbody2D vel;
+    Rigidbody2D pos;
+    Vector2 newpos;
+    public GameObject prefabBola;
+    Bloques cant;
+	// Use this for initialization
+	void Start () {
+        mov = new Vector3(0.0f, 0.0f);
+        vel = this.GetComponent<Rigidbody2D>();
+        pos = GameObject.Find("Barra").GetComponent<Rigidbody2D>();
+        this.gameObject.name = "Bola";
+        cant = GameObject.Find("Bloques").GetComponent<Bloques>();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        if (cant.vidas > 0)
+        {
+            if (vel.velocity.x == 0 && vel.velocity.y == 0)
+            {
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    if (Input.GetKey(KeyCode.LeftArrow))
+                    {
+                        mov.x = -11.0f;
+                    }
+                    if (Input.GetKey(KeyCode.RightArrow))
+                    {
+                        mov.x = 11.0f;
+                    }
+                    mov.y = 10.0f;
+                    vel.velocity = mov;
+                }
+                if (vel.velocity.y == 0)
+                {
+                    newpos = pos.position;
+                    newpos.y = newpos.y + 0.5f;
+                    if (Input.GetKey(KeyCode.LeftArrow))
+                    {
+
+                        vel.MovePosition(newpos);
+                    }
+                    if (Input.GetKey(KeyCode.RightArrow))
+                    {
+                        vel.MovePosition(newpos);
+                    }
+                }
+            }
+        }
+        
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (cant.vidas > 0)
+        {
+            if (collision.gameObject.name == "UP")
+            {
+                mov.y = -mov.y;
+                vel.velocity = mov;
+            }
+            if (collision.gameObject.name == "RIGHT" || collision.gameObject.name == "LEFT")
+            {
+                mov.x = -mov.x;
+                vel.velocity = mov;
+            }
+            if (collision.gameObject.name == "Barra")
+            {
+                if (mov.y != 0)
+                {
+                    if (Input.GetKey(KeyCode.LeftArrow))
+                    {
+                        mov.x = -11.0f;
+                    }
+                    if (Input.GetKey(KeyCode.RightArrow))
+                    {
+                        mov.x = 11.0f;
+                    }
+                }
+                mov.y = -mov.y;
+                vel.velocity = mov;
+            }
+            if (collision.gameObject.name == "DOWN")
+            {
+                Destroy(this.gameObject);
+                newpos = pos.position;
+                newpos.y = newpos.y + 0.5f;
+                Instantiate(prefabBola, newpos, Quaternion.identity);
+                cant.vidas--;
+            }
+            if (collision.gameObject.name == "Bloques(Clone)")
+            {
+                cant.cantidad--;
+                cant.score = cant.score + 100;
+                if (cant.score % 10000 == 0 && cant.score != 0)
+                {
+                    cant.vidas++;
+                }
+                if (cant.score % 2700==0)
+                {
+                    mov.y = mov.y + 0.5f;
+                    Destroy(this.gameObject);
+                    newpos = pos.position;
+                    newpos.y = newpos.y + 0.5f;
+                    Instantiate(prefabBola, newpos, Quaternion.identity);
+                }
+                mov.y = -mov.y;
+                vel.velocity = mov;
+                Destroy(collision.gameObject);
+            }
+        } 
+    }
+
+    private void Awake()
+    { 
+            GetComponent<Bola>().enabled = true;
+            GetComponent<CircleCollider2D>().enabled = true;
+        
+    }
+}
